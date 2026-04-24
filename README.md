@@ -2,9 +2,15 @@
 
 Emergency Button for Seniors: Device that sends an alert to family members in case of emergency.
 
-# Figma Project Screenpages
+## Figma Project Screenpages
 
 https://www.figma.com/design/BFPobDjzjU1PErCvVp1E4D/Emerg%C3%AAncia-60-?node-id=0-1&p=f&t=uddJcs2wwY3jTuAo-0
+
+## Figma Inspirations Pages
+
+https://www.figma.com/community/file/1610021907811642485
+https://www.figma.com/community/file/1527618855496826535
+https://www.figma.com/community/file/1481906935181630982
 
 # 🆘 Projeto Integrador EBAC - Sistema IoT de Alerta de Emergência para Idosos
 
