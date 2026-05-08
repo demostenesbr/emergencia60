@@ -1,0 +1,327 @@
+// ======================================================
+// PRISMA SCHEMA — Emergência 60+
+// Stack:
+// - PostgreSQL
+// - Prisma ORM
+// - NestJS
+// ======================================================
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ======================================================
+// ENUMS
+// ======================================================
+
+enum UserRole {
+  ADMIN
+  FAMILY
+  CAREGIVER
+}
+
+enum DeviceStatus {
+  ONLINE
+  OFFLINE
+  LOW_BATTERY
+  MAINTENANCE
+}
+
+enum AlertType {
+  EMERGENCY_BUTTON
+  FALL_DETECTION
+  LOW_BATTERY
+  DEVICE_DISCONNECTED
+}
+
+enum AlertStatus {
+  PENDING
+  PROCESSING
+  SENT
+  FAILED
+  RESOLVED
+}
+
+enum NotificationType {
+  SMS
+  PUSH
+  EMAIL
+}
+
+enum NotificationStatus {
+  QUEUED
+  SENT
+  FAILED
+  READ
+}
+
+// ======================================================
+// USERS
+// ======================================================
+
+model User {
+  id       String   @id @default(uuid())
+  name     String
+  email    String   @unique
+  password String
+  role     UserRole @default(FAMILY)
+
+  phone        String?
+  profileImage String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  elderlyProfiles ElderlyProfile[]
+  notifications   Notification[]
+  auditLogs       AuditLog[]
+
+  @@map("users")
+}
+
+// ======================================================
+// ELDERLY PROFILE
+// ======================================================
+
+model ElderlyProfile {
+  id String @id @default(uuid())
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id])
+
+  fullName  String
+  birthDate DateTime
+
+  bloodType      String?
+  allergies      String?
+  medications    String?
+  emergencyNotes String?
+
+  address String?
+  city    String?
+  state   String?
+
+  emergencyPhone String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  devices           Device[]
+  contacts          EmergencyContact[]
+  alerts            Alert[]
+  aiAssistantEvents AiAssistantEvent[]
+
+  @@map("elderly_profiles")
+}
+
+// ======================================================
+// DEVICES
+// ======================================================
+
+model Device {
+  id String @id @default(uuid())
+
+  elderlyId String
+  elderly   ElderlyProfile @relation(fields: [elderlyId], references: [id])
+
+  serialNumber    String  @unique
+  firmwareVersion String?
+
+  macAddress String?
+
+  batteryLevel   Int?
+  signalStrength Int?
+
+  status DeviceStatus @default(ONLINE)
+
+  lastHeartbeat   DateTime?
+  lastEmergencyAt DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  alerts           Alert[]
+  deviceHeartbeats DeviceHeartbeat[]
+  deviceLocations  DeviceLocation[]
+
+  @@map("devices")
+}
+
+// ======================================================
+// EMERGENCY CONTACTS
+// ======================================================
+
+model EmergencyContact {
+  id String @id @default(uuid())
+
+  elderlyId String
+  elderly   ElderlyProfile @relation(fields: [elderlyId], references: [id])
+
+  name         String
+  relationship String?
+
+  phone String
+  email String?
+
+  priority Int @default(1)
+
+  receiveSms   Boolean @default(true)
+  receivePush  Boolean @default(true)
+  receiveEmail Boolean @default(false)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("emergency_contacts")
+}
+
+// ======================================================
+// ALERTS
+// ======================================================
+
+model Alert {
+  id String @id @default(uuid())
+
+  elderlyId String
+  elderly   ElderlyProfile @relation(fields: [elderlyId], references: [id])
+
+  deviceId String
+  device   Device @relation(fields: [deviceId], references: [id])
+
+  type   AlertType
+  status AlertStatus @default(PENDING)
+
+  latitude  Float?
+  longitude Float?
+
+  batteryLevel Int?
+
+  description String?
+
+  triggeredAt DateTime  @default(now())
+  resolvedAt  DateTime?
+
+  notifications Notification[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("alerts")
+}
+
+// ======================================================
+// NOTIFICATIONS
+// ======================================================
+
+model Notification {
+  id String @id @default(uuid())
+
+  alertId String
+  alert   Alert  @relation(fields: [alertId], references: [id])
+
+  userId String?
+  user   User?   @relation(fields: [userId], references: [id])
+
+  type   NotificationType
+  status NotificationStatus @default(QUEUED)
+
+  destination String
+
+  message String
+
+  sentAt DateTime?
+  readAt DateTime?
+
+  providerResponse Json?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("notifications")
+}
+
+// ======================================================
+// DEVICE HEARTBEAT
+// ======================================================
+
+model DeviceHeartbeat {
+  id String @id @default(uuid())
+
+  deviceId String
+  device   Device @relation(fields: [deviceId], references: [id])
+
+  batteryLevel   Int?
+  signalStrength Int?
+
+  createdAt DateTime @default(now())
+
+  @@map("device_heartbeats")
+}
+
+// ======================================================
+// DEVICE LOCATION
+// ======================================================
+
+model DeviceLocation {
+  id String @id @default(uuid())
+
+  deviceId String
+  device   Device @relation(fields: [deviceId], references: [id])
+
+  latitude  Float
+  longitude Float
+
+  accuracy Float?
+
+  capturedAt DateTime @default(now())
+
+  @@map("device_locations")
+}
+
+// ======================================================
+// AI ASSISTANT EVENTS (FUTURE)
+// ======================================================
+
+model AiAssistantEvent {
+  id String @id @default(uuid())
+
+  elderlyId String
+  elderly   ElderlyProfile @relation(fields: [elderlyId], references: [id])
+
+  eventType String
+
+  input  String?
+  output String?
+
+  confidenceScore Float?
+
+  createdAt DateTime @default(now())
+
+  @@map("ai_assistant_events")
+}
+
+// ======================================================
+// AUDIT LOGS
+// ======================================================
+
+model AuditLog {
+  id String @id @default(uuid())
+
+  userId String?
+  user   User?   @relation(fields: [userId], references: [id])
+
+  action String
+  entity String
+
+  entityId String?
+
+  metadata Json?
+
+  createdAt DateTime @default(now())
+
+  @@map("audit_logs")
+}
