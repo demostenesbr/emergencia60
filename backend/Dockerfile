@@ -45,4 +45,4 @@ EXPOSE 3000
 
 # Use dumb-init to run the app
 ENTRYPOINT ["dumb-init", "--"]
-CMD ["node", "dist/main"]
+CMD ["node", "dist/src/main"]

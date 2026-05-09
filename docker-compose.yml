@@ -60,9 +60,6 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
-    volumes:
-      - ./backend/src:/app/src
-      - ./backend/dist:/app/dist
     networks:
       - emergencia60-network
     restart: unless-stopped
