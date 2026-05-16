@@ -1,122 +1,142 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+
+import 'core/config/routes.dart';
+import 'core/network/dio_client.dart';
+import 'core/services/api_service.dart';
+import 'core/services/storage_service.dart';
+import 'modules/alerts/data/alerts_repository.dart';
+import 'modules/alerts/presentation/cubit/alerts_cubit.dart';
+import 'modules/alerts/presentation/pages/dashboard_page.dart';
+import 'modules/auth/data/auth_repository.dart';
+import 'modules/auth/presentation/cubit/auth_cubit.dart';
+import 'modules/auth/presentation/cubit/auth_state.dart';
+import 'modules/auth/presentation/pages/login_page.dart';
+import 'modules/elderly/presentation/cubit/emergency_cubit.dart';
+import 'modules/elderly/presentation/pages/emergency_page.dart';
+import 'shared/widgets/loading_widget.dart';
 
 void main() {
-  runApp(const MyApp());
+  WidgetsFlutterBinding.ensureInitialized();
+  runApp(const EmergencyApp());
 }
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+class EmergencyApp extends StatelessWidget {
+  const EmergencyApp({super.key});
 
-  // This widget is the root of your application.
+  static const Color brandRed = Color(0xFFE53734);
+
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Flutter Demo',
-      theme: ThemeData(
-        // This is the theme of your application.
-        //
-        // TRY THIS: Try running your application with "flutter run". You'll see
-        // the application has a purple toolbar. Then, without quitting the app,
-        // try changing the seedColor in the colorScheme below to Colors.green
-        // and then invoke "hot reload" (save your changes or press the "hot
-        // reload" button in a Flutter-supported IDE, or press "r" if you used
-        // the command line to start the app).
-        //
-        // Notice that the counter didn't reset back to zero; the application
-        // state is not lost during the reload. To reset the state, use hot
-        // restart instead.
-        //
-        // This works for code too, not just values: Most code changes can be
-        // tested with just a hot reload.
-        colorScheme: .fromSeed(seedColor: Colors.deepPurple),
+    final storageService = StorageService.instance;
+    final apiService = ApiService(
+      dio: DioClient(storageService: storageService).dio,
+    );
+
+    return MultiRepositoryProvider(
+      providers: [
+        RepositoryProvider<StorageService>.value(value: storageService),
+        RepositoryProvider<ApiService>.value(value: apiService),
+        RepositoryProvider<AuthRepository>(
+          create: (_) => AuthRepository(
+            apiService: apiService,
+            storageService: storageService,
+          ),
+        ),
+        RepositoryProvider<AlertsRepository>(
+          create: (_) => AlertsRepository(apiService: apiService),
+        ),
+      ],
+      child: MultiBlocProvider(
+        providers: [
+          BlocProvider<AuthCubit>(
+            create: (context) =>
+                AuthCubit(authRepository: context.read<AuthRepository>())
+                  ..restoreSession(),
+          ),
+          BlocProvider<AlertsCubit>(
+            create: (context) =>
+                AlertsCubit(alertsRepository: context.read<AlertsRepository>()),
+          ),
+          BlocProvider<EmergencyCubit>(
+            create: (context) => EmergencyCubit(
+              alertsRepository: context.read<AlertsRepository>(),
+            ),
+          ),
+        ],
+        child: MaterialApp(
+          debugShowCheckedModeBanner: false,
+          title: 'Emergência 60+',
+          theme: ThemeData(
+            useMaterial3: true,
+            colorScheme: ColorScheme.fromSeed(
+              seedColor: brandRed,
+              brightness: Brightness.light,
+            ),
+            filledButtonTheme: FilledButtonThemeData(
+              style: FilledButton.styleFrom(
+                backgroundColor: brandRed,
+                foregroundColor: Colors.white,
+              ),
+            ),
+            elevatedButtonTheme: ElevatedButtonThemeData(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: brandRed,
+                foregroundColor: Colors.white,
+              ),
+            ),
+            textButtonTheme: TextButtonThemeData(
+              style: TextButton.styleFrom(foregroundColor: brandRed),
+            ),
+            outlinedButtonTheme: OutlinedButtonThemeData(
+              style: OutlinedButton.styleFrom(
+                foregroundColor: brandRed,
+                side: const BorderSide(color: brandRed),
+              ),
+            ),
+            floatingActionButtonTheme: const FloatingActionButtonThemeData(
+              backgroundColor: brandRed,
+              foregroundColor: Colors.white,
+            ),
+            scaffoldBackgroundColor: const Color(0xFFF8F6F1),
+            appBarTheme: const AppBarTheme(
+              centerTitle: true,
+              backgroundColor: brandRed,
+              foregroundColor: Colors.white,
+              elevation: 0,
+            ),
+            textTheme: ThemeData.light().textTheme.apply(
+              bodyColor: const Color(0xFF1F1F1F),
+              displayColor: const Color(0xFF1F1F1F),
+            ),
+          ),
+          routes: {AppRoutes.emergency: (_) => const EmergencyPage()},
+          home: const _AuthGate(),
+        ),
       ),
-      home: const MyHomePage(title: 'Flutter Demo Home Page'),
     );
   }
 }
 
-class MyHomePage extends StatefulWidget {
-  const MyHomePage({super.key, required this.title});
-
-  // This widget is the home page of your application. It is stateful, meaning
-  // that it has a State object (defined below) that contains fields that affect
-  // how it looks.
-
-  // This class is the configuration for the state. It holds the values (in this
-  // case the title) provided by the parent (in this case the App widget) and
-  // used by the build method of the State. Fields in a Widget subclass are
-  // always marked "final".
-
-  final String title;
-
-  @override
-  State<MyHomePage> createState() => _MyHomePageState();
-}
-
-class _MyHomePageState extends State<MyHomePage> {
-  int _counter = 0;
-
-  void _incrementCounter() {
-    setState(() {
-      // This call to setState tells the Flutter framework that something has
-      // changed in this State, which causes it to rerun the build method below
-      // so that the display can reflect the updated values. If we changed
-      // _counter without calling setState(), then the build method would not be
-      // called again, and so nothing would appear to happen.
-      _counter++;
-    });
-  }
+class _AuthGate extends StatelessWidget {
+  const _AuthGate();
 
   @override
   Widget build(BuildContext context) {
-    // This method is rerun every time setState is called, for instance as done
-    // by the _incrementCounter method above.
-    //
-    // The Flutter framework has been optimized to make rerunning build methods
-    // fast, so that you can just rebuild anything that needs updating rather
-    // than having to individually change instances of widgets.
-    return Scaffold(
-      appBar: AppBar(
-        // TRY THIS: Try changing the color here to a specific color (to
-        // Colors.amber, perhaps?) and trigger a hot reload to see the AppBar
-        // change color while the other colors stay the same.
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        // Here we take the value from the MyHomePage object that was created by
-        // the App.build method, and use it to set our appbar title.
-        title: Text(widget.title),
-      ),
-      body: Center(
-        // Center is a layout widget. It takes a single child and positions it
-        // in the middle of the parent.
-        child: Column(
-          // Column is also a layout widget. It takes a list of children and
-          // arranges them vertically. By default, it sizes itself to fit its
-          // children horizontally, and tries to be as tall as its parent.
-          //
-          // Column has various properties to control how it sizes itself and
-          // how it positions its children. Here we use mainAxisAlignment to
-          // center the children vertically; the main axis here is the vertical
-          // axis because Columns are vertical (the cross axis would be
-          // horizontal).
-          //
-          // TRY THIS: Invoke "debug painting" (choose the "Toggle Debug Paint"
-          // action in the IDE, or press "p" in the console), to see the
-          // wireframe for each widget.
-          mainAxisAlignment: .center,
-          children: [
-            const Text('You have pushed the button this many times:'),
-            Text(
-              '$_counter',
-              style: Theme.of(context).textTheme.headlineMedium,
-            ),
-          ],
-        ),
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
-        tooltip: 'Increment',
-        child: const Icon(Icons.add),
-      ),
+    return BlocBuilder<AuthCubit, AuthState>(
+      builder: (context, state) {
+        if (state is AuthLoading) {
+          return const Scaffold(
+            body: LoadingWidget(message: 'Carregando acesso...'),
+          );
+        }
+
+        if (state is AuthAuthenticated) {
+          return const DashboardPage();
+        }
+
+        return const LoginPage();
+      },
     );
   }
 }
