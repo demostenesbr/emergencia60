@@ -1,26 +1,21 @@
+import { InjectQueue } from '@nestjs/bullmq';
 import { Injectable } from '@nestjs/common';
-import { CreateQueueDto } from './dto/create-queue.dto';
-import { UpdateQueueDto } from './dto/update-queue.dto';
+import { Queue } from 'bullmq';
+import { NOTIFICATIONS_QUEUE } from './queue.constants';
 
 @Injectable()
 export class QueueService {
-  create(createQueueDto: CreateQueueDto) {
-    return 'This action adds a new queue';
-  }
+  constructor(@InjectQueue(NOTIFICATIONS_QUEUE) private readonly notificationsQueue: Queue) {}
 
-  findAll() {
-    return `This action returns all queue`;
-  }
-
-  findOne(id: number) {
-    return `This action returns a #${id} queue`;
-  }
-
-  update(id: number, updateQueueDto: UpdateQueueDto) {
-    return `This action updates a #${id} queue`;
-  }
-
-  remove(id: number) {
-    return `This action removes a #${id} queue`;
+  enqueueAlertNotification(alertId: string) {
+    return this.notificationsQueue.add(
+      'send-alert',
+      { alertId },
+      {
+        attempts: 5,
+        backoff: { type: 'exponential', delay: 1000 },
+        removeOnComplete: true,
+      },
+    );
   }
 }

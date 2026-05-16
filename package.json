@@ -1,21 +1,8 @@
 {
-  "name": "emergencia60",
-  "version": "1.0.0",
-  "description": "Emergency Button for Seniors: Device that sends an alert to family members in case of emergency.",
-  "main": "index.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+  "dependencies": {
+    "dotenv": "^17.4.2"
   },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/demostenesbr/emergencia60.git"
-  },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "type": "commonjs",
-  "bugs": {
-    "url": "https://github.com/demostenesbr/emergencia60/issues"
-  },
-  "homepage": "https://github.com/demostenesbr/emergencia60#readme"
+  "devDependencies": {
+    "@types/passport-jwt": "^4.0.1"
+  }
 }

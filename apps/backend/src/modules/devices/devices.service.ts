@@ -1,26 +1,65 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
+import { DeviceStatus } from '@prisma/client';
+import { randomUUID } from 'crypto';
 import { CreateDeviceDto } from './dto/create-device.dto';
 import { UpdateDeviceDto } from './dto/update-device.dto';
+import { DevicesRepository } from './devices.repository';
 
 @Injectable()
 export class DevicesService {
+  constructor(private readonly devicesRepository: DevicesRepository) {}
+
   create(createDeviceDto: CreateDeviceDto) {
-    return 'This action adds a new device';
+    return this.devicesRepository.create({
+      ...createDeviceDto,
+      apiKey: createDeviceDto.apiKey ?? randomUUID(),
+    });
   }
 
   findAll() {
-    return `This action returns all devices`;
+    return this.devicesRepository.findAll();
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} device`;
+  async findOne(id: string) {
+    const device = await this.devicesRepository.findById(id);
+
+    if (!device) {
+      throw new NotFoundException('Dispositivo não encontrado');
+    }
+
+    return device;
   }
 
-  update(id: number, updateDeviceDto: UpdateDeviceDto) {
-    return `This action updates a #${id} device`;
+  update(id: string, updateDeviceDto: UpdateDeviceDto) {
+    return this.devicesRepository.update(id, updateDeviceDto);
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} device`;
+  remove(id: string) {
+    return this.devicesRepository.remove(id);
+  }
+
+  async heartbeat(serialNumber: string, apiKey: string | undefined, data: UpdateDeviceDto) {
+    if (!apiKey) {
+      throw new UnauthorizedException('Header x-device-key é obrigatório');
+    }
+
+    const device = await this.devicesRepository.findBySerialNumber(serialNumber);
+
+    if (!device) {
+      throw new NotFoundException('Dispositivo não encontrado');
+    }
+
+    if (device.apiKey !== apiKey) {
+      throw new UnauthorizedException('API key inválida');
+    }
+
+    return this.devicesRepository.heartbeat(device.id, {
+      batteryLevel: data.batteryLevel,
+      signalStrength: data.signalStrength,
+      status:
+        data.batteryLevel !== undefined && data.batteryLevel < 20
+          ? DeviceStatus.LOW_BATTERY
+          : DeviceStatus.ONLINE,
+    });
   }
 }

@@ -1,4 +1,8 @@
-import { WebSocketGateway, SubscribeMessage, MessageBody } from '@nestjs/websockets';
+import {
+  WebSocketGateway,
+  SubscribeMessage,
+  MessageBody,
+} from '@nestjs/websockets';
 import { WebsocketService } from './websocket.service';
 import { CreateWebsocketDto } from './dto/create-websocket.dto';
 import { UpdateWebsocketDto } from './dto/update-websocket.dto';
@@ -24,7 +28,11 @@ export class WebsocketGateway {
 
   @SubscribeMessage('updateWebsocket')
   update(@MessageBody() updateWebsocketDto: UpdateWebsocketDto) {
-    return this.websocketService.update(updateWebsocketDto.id, updateWebsocketDto);
+    const { id } = updateWebsocketDto;
+    if (id === undefined || id === null) {
+      throw new Error('updateWebsocketDto.id is required');
+    }
+    return this.websocketService.update(id, updateWebsocketDto);
   }
 
   @SubscribeMessage('removeWebsocket')

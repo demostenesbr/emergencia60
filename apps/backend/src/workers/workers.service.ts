@@ -1,26 +1,18 @@
-import { Injectable } from '@nestjs/common';
-import { CreateWorkerDto } from './dto/create-worker.dto';
-import { UpdateWorkerDto } from './dto/update-worker.dto';
+import { Injectable, Logger } from '@nestjs/common';
 
 @Injectable()
 export class WorkersService {
-  create(createWorkerDto: CreateWorkerDto) {
-    return 'This action adds a new worker';
+  private readonly logger = new Logger(WorkersService.name);
+
+  async sendSms(destination: string, message: string) {
+    this.logger.log(`SMS -> ${destination}: ${message}`);
   }
 
-  findAll() {
-    return `This action returns all workers`;
+  async sendPush(destination: string, message: string) {
+    this.logger.log(`Push -> ${destination}: ${message}`);
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} worker`;
-  }
-
-  update(id: number, updateWorkerDto: UpdateWorkerDto) {
-    return `This action updates a #${id} worker`;
-  }
-
-  remove(id: number) {
-    return `This action removes a #${id} worker`;
+  async sendEmail(destination: string, message: string) {
+    this.logger.log(`Email -> ${destination}: ${message}`);
   }
 }

@@ -1,4 +1,5 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Patch, Post } from '@nestjs/common';
+import { Elderly } from '@prisma/client';
 import { ElderlyService } from './elderly.service';
 import { CreateElderlyDto } from './dto/create-elderly.dto';
 import { UpdateElderlyDto } from './dto/update-elderly.dto';
@@ -8,27 +9,30 @@ export class ElderlyController {
   constructor(private readonly elderlyService: ElderlyService) {}
 
   @Post()
-  create(@Body() createElderlyDto: CreateElderlyDto) {
-    return this.elderlyService.create(createElderlyDto);
+  async create(@Body() createElderlyDto: CreateElderlyDto): Promise<Elderly> {
+    return await this.elderlyService.create(createElderlyDto);
   }
 
   @Get()
-  findAll() {
-    return this.elderlyService.findAll();
+  async findAll(): Promise<Elderly[]> {
+    return await this.elderlyService.findAll();
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.elderlyService.findOne(+id);
+  async findOne(@Param('id') id: string): Promise<Elderly> {
+    return await this.elderlyService.findOne(id);
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateElderlyDto: UpdateElderlyDto) {
-    return this.elderlyService.update(+id, updateElderlyDto);
+  async update(
+    @Param('id') id: string,
+    @Body() updateElderlyDto: UpdateElderlyDto,
+  ): Promise<Elderly> {
+    return await this.elderlyService.update(id, updateElderlyDto);
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.elderlyService.remove(+id);
+  async remove(@Param('id') id: string): Promise<Elderly> {
+    return await this.elderlyService.remove(id);
   }
 }

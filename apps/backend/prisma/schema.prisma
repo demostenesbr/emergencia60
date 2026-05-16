@@ -1,11 +1,3 @@
-// ======================================================
-// PRISMA SCHEMA — Emergência 60+
-// Stack:
-// - PostgreSQL
-// - Prisma ORM
-// - NestJS
-// ======================================================
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -13,10 +5,6 @@ generator client {
 datasource db {
   provider = "postgresql"
 }
-
-// ======================================================
-// ENUMS
-// ======================================================
 
 enum UserRole {
   ADMIN
@@ -59,10 +47,6 @@ enum NotificationStatus {
   READ
 }
 
-// ======================================================
-// USERS
-// ======================================================
-
 model User {
   id       String   @id @default(uuid())
   name     String
@@ -72,34 +56,27 @@ model User {
 
   phone        String?
   profileImage String?
+  refreshTokenHash String?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  elderlyProfiles ElderlyProfile[]
+  elderlyProfiles Elderly[]
   notifications   Notification[]
   auditLogs       AuditLog[]
 
   @@map("users")
 }
 
-// ======================================================
-// ELDERLY PROFILE
-// ======================================================
-
-model ElderlyProfile {
+model Elderly {
   id String @id @default(uuid())
 
   userId String
   user   User   @relation(fields: [userId], references: [id])
 
-  fullName  String
-  birthDate DateTime
-
-  bloodType      String?
-  allergies      String?
-  medications    String?
-  emergencyNotes String?
+  name String
+  birthDate DateTime?
+  notes String?
 
   address String?
   city    String?
@@ -110,25 +87,21 @@ model ElderlyProfile {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  devices           Device[]
-  contacts          EmergencyContact[]
-  alerts            Alert[]
-  aiAssistantEvents AiAssistantEvent[]
+  devices    Device[]
+  contacts   Contact[]
+  alerts     Alert[]
 
   @@map("elderly_profiles")
 }
-
-// ======================================================
-// DEVICES
-// ======================================================
 
 model Device {
   id String @id @default(uuid())
 
   elderlyId String
-  elderly   ElderlyProfile @relation(fields: [elderlyId], references: [id])
+  elderly   Elderly @relation(fields: [elderlyId], references: [id])
 
   serialNumber    String  @unique
+  apiKey          String  @unique
   firmwareVersion String?
 
   macAddress String?
@@ -144,22 +117,16 @@ model Device {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  alerts           Alert[]
-  deviceHeartbeats DeviceHeartbeat[]
-  deviceLocations  DeviceLocation[]
+  alerts Alert[]
 
   @@map("devices")
 }
 
-// ======================================================
-// EMERGENCY CONTACTS
-// ======================================================
-
-model EmergencyContact {
+model Contact {
   id String @id @default(uuid())
 
   elderlyId String
-  elderly   ElderlyProfile @relation(fields: [elderlyId], references: [id])
+  elderly   Elderly @relation(fields: [elderlyId], references: [id])
 
   name         String
   relationship String?
@@ -179,15 +146,11 @@ model EmergencyContact {
   @@map("emergency_contacts")
 }
 
-// ======================================================
-// ALERTS
-// ======================================================
-
 model Alert {
   id String @id @default(uuid())
 
   elderlyId String
-  elderly   ElderlyProfile @relation(fields: [elderlyId], references: [id])
+  elderly   Elderly @relation(fields: [elderlyId], references: [id])
 
   deviceId String
   device   Device @relation(fields: [deviceId], references: [id])
@@ -212,10 +175,6 @@ model Alert {
 
   @@map("alerts")
 }
-
-// ======================================================
-// NOTIFICATIONS
-// ======================================================
 
 model Notification {
   id String @id @default(uuid())
@@ -243,70 +202,6 @@ model Notification {
 
   @@map("notifications")
 }
-
-// ======================================================
-// DEVICE HEARTBEAT
-// ======================================================
-
-model DeviceHeartbeat {
-  id String @id @default(uuid())
-
-  deviceId String
-  device   Device @relation(fields: [deviceId], references: [id])
-
-  batteryLevel   Int?
-  signalStrength Int?
-
-  createdAt DateTime @default(now())
-
-  @@map("device_heartbeats")
-}
-
-// ======================================================
-// DEVICE LOCATION
-// ======================================================
-
-model DeviceLocation {
-  id String @id @default(uuid())
-
-  deviceId String
-  device   Device @relation(fields: [deviceId], references: [id])
-
-  latitude  Float
-  longitude Float
-
-  accuracy Float?
-
-  capturedAt DateTime @default(now())
-
-  @@map("device_locations")
-}
-
-// ======================================================
-// AI ASSISTANT EVENTS (FUTURE)
-// ======================================================
-
-model AiAssistantEvent {
-  id String @id @default(uuid())
-
-  elderlyId String
-  elderly   ElderlyProfile @relation(fields: [elderlyId], references: [id])
-
-  eventType String
-
-  input  String?
-  output String?
-
-  confidenceScore Float?
-
-  createdAt DateTime @default(now())
-
-  @@map("ai_assistant_events")
-}
-
-// ======================================================
-// AUDIT LOGS
-// ======================================================
 
 model AuditLog {
   id String @id @default(uuid())

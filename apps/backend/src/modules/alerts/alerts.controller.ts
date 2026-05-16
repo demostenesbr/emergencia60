@@ -1,4 +1,5 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Headers, Param, Patch, Post } from '@nestjs/common';
+import { Alert } from '@prisma/client';
 import { AlertsService } from './alerts.service';
 import { CreateAlertDto } from './dto/create-alert.dto';
 import { UpdateAlertDto } from './dto/update-alert.dto';
@@ -8,27 +9,33 @@ export class AlertsController {
   constructor(private readonly alertsService: AlertsService) {}
 
   @Post()
-  create(@Body() createAlertDto: CreateAlertDto) {
-    return this.alertsService.create(createAlertDto);
+  async create(
+    @Body() createAlertDto: CreateAlertDto,
+    @Headers('x-device-key') deviceKey?: string,
+  ): Promise<Alert> {
+    return await this.alertsService.create(createAlertDto, deviceKey);
   }
 
   @Get()
-  findAll() {
-    return this.alertsService.findAll();
+  async findAll(): Promise<Alert[]> {
+    return await this.alertsService.findAll();
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.alertsService.findOne(+id);
+  async findOne(@Param('id') id: string): Promise<Alert> {
+    return await this.alertsService.findOne(id);
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateAlertDto: UpdateAlertDto) {
-    return this.alertsService.update(+id, updateAlertDto);
+  async update(
+    @Param('id') id: string,
+    @Body() updateAlertDto: UpdateAlertDto,
+  ): Promise<Alert> {
+    return await this.alertsService.update(id, updateAlertDto);
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.alertsService.remove(+id);
+  async remove(@Param('id') id: string): Promise<Alert> {
+    return await this.alertsService.remove(id);
   }
 }

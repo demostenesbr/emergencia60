@@ -1,26 +1,41 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateElderlyDto } from './dto/create-elderly.dto';
 import { UpdateElderlyDto } from './dto/update-elderly.dto';
+import { ElderlyRepository } from './elderly.repository';
 
 @Injectable()
 export class ElderlyService {
+  constructor(private readonly elderlyRepository: ElderlyRepository) {}
+
   create(createElderlyDto: CreateElderlyDto) {
-    return 'This action adds a new elderly';
+    return this.elderlyRepository.create({
+      ...createElderlyDto,
+      birthDate: createElderlyDto.birthDate ? new Date(createElderlyDto.birthDate) : undefined,
+    });
   }
 
   findAll() {
-    return `This action returns all elderly`;
+    return this.elderlyRepository.findAll();
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} elderly`;
+  async findOne(id: string) {
+    const elderly = await this.elderlyRepository.findById(id);
+
+    if (!elderly) {
+      throw new NotFoundException('Idoso não encontrado');
+    }
+
+    return elderly;
   }
 
-  update(id: number, updateElderlyDto: UpdateElderlyDto) {
-    return `This action updates a #${id} elderly`;
+  update(id: string, updateElderlyDto: UpdateElderlyDto) {
+    return this.elderlyRepository.update(id, {
+      ...updateElderlyDto,
+      birthDate: updateElderlyDto.birthDate ? new Date(updateElderlyDto.birthDate) : undefined,
+    });
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} elderly`;
+  remove(id: string) {
+    return this.elderlyRepository.remove(id);
   }
 }
