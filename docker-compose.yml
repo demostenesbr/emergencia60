@@ -43,7 +43,7 @@ services:
   # NestJS Backend Application
   backend:
     build:
-      context: ./backend
+      context: ./apps/backend
       dockerfile: Dockerfile
     container_name: emergencia60_backend
     environment:

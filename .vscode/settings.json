@@ -1,5 +1,10 @@
 {
     "chat.tools.terminal.autoApprove": {
-        "npm run start": true
+        "npm run start": true,
+        "/^cmd /c \"set PORT=3001&& npm --prefix apps/backend run start\"$/": {
+            "approve": true,
+            "matchCommandLine": true
+        },
+        "Out-File": true
     }
 }

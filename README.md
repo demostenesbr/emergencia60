@@ -161,3 +161,35 @@ tools/
 ```bash
 npm install -g nx
 ```
+
+### Executar com Docker Compose (recomendado)
+
+Use Docker Compose para criar todos os serviços (Postgres, Redis e backend NestJS). A porta 3000 do backend é mapeada para o host e expõe o Swagger UI e os endpoints REST.
+
+```powershell
+# No diretório raiz do projeto
+docker-compose down --remove-orphans
+docker-compose up --build -d
+
+# Verificar containers em execução
+docker-compose ps
+
+# Ver logs do backend
+docker-compose logs -f backend
+```
+
+Valide os endpoints em um terminal ou no browser:
+
+```bash
+# Swagger UI (rota /docs):
+http://localhost:3000/docs
+
+# Health endpoint:
+curl http://localhost:3000/api/v1/health
+```
+
+Observações:
+- Se estiver usando ambiente Windows/PowerShell, use `powershell` para executar os comandos acima.
+- As variáveis de ambiente para `DATABASE_URL`, `REDIS_*` e `JWT_*` são configuradas em `docker-compose.yml` ou via `.env` conforme necessário.
+
+Se quiser, eu posso rodar os comandos de build/start aqui e confirmar o status dos endpoints para você.

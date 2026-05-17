@@ -21,7 +21,9 @@ async function bootstrap() {
     }),
   );
 
-  const document = SwaggerModule.createDocument(app, swaggerConfig);
+  const document = SwaggerModule.createDocument(app, swaggerConfig, {
+    deepScanRoutes: true,
+  });
   SwaggerModule.setup(swaggerPath, app, document);
   await app.listen(port, host);
 
