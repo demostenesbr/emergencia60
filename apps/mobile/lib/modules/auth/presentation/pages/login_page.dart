@@ -1,5 +1,3 @@
-import 'dart:ui';
-
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -84,10 +82,33 @@ class _LoginPageState extends State<LoginPage> {
                                     20,
                                   );
                                   final boxShadow = [
-                                    BoxShadow(
-                                      color: Colors.grey,
-                                      blurRadius: 5,
-                                      offset: const Offset(0, 2),
+                                    // Sombra 1px no topo
+                                    const BoxShadow(
+                                      color: Color(0xFFCCCCCC),
+                                      blurRadius: 0,
+                                      spreadRadius: 0,
+                                      offset: Offset(0, -1),
+                                    ),
+                                    // Sombra 1px à esquerda
+                                    const BoxShadow(
+                                      color: Color(0xFFCCCCCC),
+                                      blurRadius: 0,
+                                      spreadRadius: 0,
+                                      offset: Offset(-1, 0),
+                                    ),
+                                    // Sombra 3px à direita
+                                    const BoxShadow(
+                                      color: Color(0xFFCCCCCC),
+                                      blurRadius: 0,
+                                      spreadRadius: 0,
+                                      offset: Offset(3, 0),
+                                    ),
+                                    // Sombra 3px no rodapé
+                                    const BoxShadow(
+                                      color: Color(0xFFCCCCCC),
+                                      blurRadius: 0,
+                                      spreadRadius: 0,
+                                      offset: Offset(0, 3),
                                     ),
                                   ];
 
@@ -95,8 +116,8 @@ class _LoginPageState extends State<LoginPage> {
                                   if (kIsWeb) {
                                     inner = Image.network(
                                       '/icons/Icon-512.png',
-                                      width: 72,
-                                      height: 72,
+                                      width: 88,
+                                      height: 88,
                                       fit: BoxFit.cover,
                                       errorBuilder:
                                           (context, error, stackTrace) {

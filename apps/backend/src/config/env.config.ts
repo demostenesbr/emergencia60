@@ -21,7 +21,7 @@ export default (): AppEnvironment => ({
   PORT: toNumber(process.env.PORT, 3000),
   DATABASE_URL:
     process.env.DATABASE_URL ??
-    'postgresql://postgres:postgres@localhost:5432/emergencia60',
+    'postgresql://postgres:postgres@localhost:5432/emergencia60_db',
   JWT_ACCESS_SECRET:
     process.env.JWT_ACCESS_SECRET ?? 'emergencia60-access-secret',
   JWT_REFRESH_SECRET:
