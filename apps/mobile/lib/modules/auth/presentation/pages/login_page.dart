@@ -1,4 +1,7 @@
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../shared/widgets/loading_widget.dart';
@@ -18,6 +21,9 @@ class _LoginPageState extends State<LoginPage> {
   final _passwordController = TextEditingController();
 
   static const Color brandRed = Color(0xFFE53734);
+  static const Color titleBlue = Color(0xFF044679);
+  static const Color subTitleGrey = Color(0xFF64748B);
+  // static const Color brandBlue = Color(0xFFF7F9F9);
 
   @override
   void dispose() {
@@ -47,7 +53,7 @@ class _LoginPageState extends State<LoginPage> {
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
                   content: Text(state.message),
-                  backgroundColor: Colors.red.shade700,
+                  backgroundColor: brandRed,
                 ),
               );
             }
@@ -72,10 +78,57 @@ class _LoginPageState extends State<LoginPage> {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.stretch,
                             children: [
-                              const Icon(
-                                Icons.health_and_safety,
-                                size: 72,
-                                color: brandRed,
+                              Builder(
+                                builder: (context) {
+                                  final borderRadius = BorderRadius.circular(
+                                    20,
+                                  );
+                                  final boxShadow = [
+                                    BoxShadow(
+                                      color: Colors.grey,
+                                      blurRadius: 5,
+                                      offset: const Offset(0, 2),
+                                    ),
+                                  ];
+
+                                  Widget inner;
+                                  if (kIsWeb) {
+                                    inner = Image.network(
+                                      '/icons/Icon-512.png',
+                                      width: 72,
+                                      height: 72,
+                                      fit: BoxFit.cover,
+                                      errorBuilder:
+                                          (context, error, stackTrace) {
+                                            return const Icon(
+                                              Icons.health_and_safety,
+                                              size: 72,
+                                              color: brandRed,
+                                            );
+                                          },
+                                    );
+                                  } else {
+                                    inner = const Icon(
+                                      Icons.health_and_safety,
+                                      size: 72,
+                                      color: brandRed,
+                                    );
+                                  }
+
+                                  return Container(
+                                    width: 88,
+                                    height: 88,
+                                    decoration: BoxDecoration(
+                                      color: Colors.white,
+                                      borderRadius: borderRadius,
+                                      boxShadow: boxShadow,
+                                    ),
+                                    child: ClipRRect(
+                                      borderRadius: borderRadius,
+                                      child: Center(child: inner),
+                                    ),
+                                  );
+                                },
                               ),
                               const SizedBox(height: 12),
                               Text(
@@ -87,15 +140,18 @@ class _LoginPageState extends State<LoginPage> {
                                     ?.copyWith(
                                       fontSize: 28,
                                       fontWeight: FontWeight.w800,
+                                      color: titleBlue,
                                     ),
                               ),
                               const SizedBox(height: 8),
                               Text(
                                 'Serviços de resposta rápida'.toUpperCase(),
                                 textAlign: TextAlign.center,
-                                style: Theme.of(
-                                  context,
-                                ).textTheme.bodyLarge?.copyWith(fontSize: 18),
+                                style: Theme.of(context).textTheme.bodyLarge
+                                    ?.copyWith(
+                                      fontSize: 18,
+                                      color: subTitleGrey,
+                                    ),
                               ),
                               const SizedBox(height: 28),
                               TextFormField(
@@ -103,9 +159,11 @@ class _LoginPageState extends State<LoginPage> {
                                 keyboardType: TextInputType.emailAddress,
                                 autofillHints: const [AutofillHints.username],
                                 style: const TextStyle(fontSize: 18),
-                                decoration: const InputDecoration(
+                                decoration: InputDecoration(
                                   labelText: 'Email',
-                                  border: OutlineInputBorder(),
+                                  border: const OutlineInputBorder(),
+                                  filled: true,
+                                  fillColor: const Color(0xFFF7F9F9),
                                 ),
                                 validator: (value) {
                                   if (value == null || value.trim().isEmpty) {
@@ -123,9 +181,11 @@ class _LoginPageState extends State<LoginPage> {
                                 obscureText: true,
                                 autofillHints: const [AutofillHints.password],
                                 style: const TextStyle(fontSize: 18),
-                                decoration: const InputDecoration(
+                                decoration: InputDecoration(
                                   labelText: 'Senha',
-                                  border: OutlineInputBorder(),
+                                  border: const OutlineInputBorder(),
+                                  filled: true,
+                                  fillColor: const Color(0xFFF7F9F9),
                                 ),
                                 validator: (value) {
                                   if (value == null || value.isEmpty) {
