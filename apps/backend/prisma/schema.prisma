@@ -1,0 +1,222 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum UserRole {
+  ADMIN
+  FAMILY
+  CAREGIVER
+}
+
+enum DeviceStatus {
+  ONLINE
+  OFFLINE
+  LOW_BATTERY
+  MAINTENANCE
+}
+
+enum AlertType {
+  EMERGENCY_BUTTON
+  FALL_DETECTION
+  LOW_BATTERY
+  DEVICE_DISCONNECTED
+}
+
+enum AlertStatus {
+  PENDING
+  PROCESSING
+  SENT
+  FAILED
+  RESOLVED
+}
+
+enum NotificationType {
+  SMS
+  PUSH
+  EMAIL
+}
+
+enum NotificationStatus {
+  QUEUED
+  SENT
+  FAILED
+  READ
+}
+
+model User {
+  id       String   @id @default(uuid())
+  name     String
+  email    String   @unique
+  password String
+  role     UserRole @default(FAMILY)
+
+  phone        String?
+  profileImage String?
+  refreshTokenHash String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  elderlyProfiles Elderly[]
+  notifications   Notification[]
+  auditLogs       AuditLog[]
+
+  @@map("users")
+}
+
+model Elderly {
+  id String @id @default(uuid())
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id])
+
+  name String
+  birthDate DateTime?
+  notes String?
+
+  address String?
+  city    String?
+  state   String?
+
+  emergencyPhone String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  devices    Device[]
+  contacts   Contact[]
+  alerts     Alert[]
+
+  @@map("elderly_profiles")
+}
+
+model Device {
+  id String @id @default(uuid())
+
+  elderlyId String
+  elderly   Elderly @relation(fields: [elderlyId], references: [id])
+
+  serialNumber    String  @unique
+  apiKey          String  @unique
+  firmwareVersion String?
+
+  macAddress String?
+
+  batteryLevel   Int?
+  signalStrength Int?
+
+  status DeviceStatus @default(ONLINE)
+
+  lastHeartbeat   DateTime?
+  lastEmergencyAt DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  alerts Alert[]
+
+  @@map("devices")
+}
+
+model Contact {
+  id String @id @default(uuid())
+
+  elderlyId String
+  elderly   Elderly @relation(fields: [elderlyId], references: [id])
+
+  name         String
+  relationship String?
+
+  phone String
+  email String?
+
+  priority Int @default(1)
+
+  receiveSms   Boolean @default(true)
+  receivePush  Boolean @default(true)
+  receiveEmail Boolean @default(false)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("emergency_contacts")
+}
+
+model Alert {
+  id String @id @default(uuid())
+
+  elderlyId String
+  elderly   Elderly @relation(fields: [elderlyId], references: [id])
+
+  deviceId String
+  device   Device @relation(fields: [deviceId], references: [id])
+
+  type   AlertType
+  status AlertStatus @default(PENDING)
+
+  latitude  Float?
+  longitude Float?
+
+  batteryLevel Int?
+
+  description String?
+
+  triggeredAt DateTime  @default(now())
+  resolvedAt  DateTime?
+
+  notifications Notification[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("alerts")
+}
+
+model Notification {
+  id String @id @default(uuid())
+
+  alertId String
+  alert   Alert  @relation(fields: [alertId], references: [id])
+
+  userId String?
+  user   User?   @relation(fields: [userId], references: [id])
+
+  type   NotificationType
+  status NotificationStatus @default(QUEUED)
+
+  destination String
+
+  message String
+
+  sentAt DateTime?
+  readAt DateTime?
+
+  providerResponse Json?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("notifications")
+}
+
+model AuditLog {
+  id String @id @default(uuid())
+
+  userId String?
+  user   User?   @relation(fields: [userId], references: [id])
+
+  action String
+  entity String
+
+  entityId String?
+
+  metadata Json?
+
+  createdAt DateTime @default(now())
+
+  @@map("audit_logs")
+}
