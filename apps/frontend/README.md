@@ -1,17 +1,36 @@
-# frontend
+# Frontend
 
-A new Flutter project.
+Aplicação Flutter da camada de interface principal do projeto.
 
-## Getting Started
+## Objetivo
 
-This project is a starting point for a Flutter application.
+Esta aplicação funciona como base da experiência visual do sistema. No estado atual, ela ainda está próxima do scaffold padrão do Flutter e serve como ponto de partida para a interface.
 
-A few resources to get you started if this is your first Flutter project:
+## Estrutura
 
-- [Learn Flutter](https://docs.flutter.dev/get-started/learn-flutter)
-- [Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Flutter learning resources](https://docs.flutter.dev/reference/learning-resources)
+- `lib/main.dart`: ponto de entrada da aplicação
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+## Tecnologias
+
+- Flutter
+- Material Design
+
+## Como executar
+
+```powershell
+cd apps/frontend
+flutter pub get
+flutter run
+```
+
+Para checagem local:
+
+```powershell
+flutter test
+flutter analyze
+```
+
+## Observações
+
+- O app ainda está em estágio inicial e usa a estrutura padrão gerada pelo Flutter.
+- Quando a interface principal evoluir, este README deve ser atualizado com as rotas, telas e dependências reais.
