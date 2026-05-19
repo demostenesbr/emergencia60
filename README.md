@@ -1,195 +1,127 @@
 # emergencia60
 
-Emergency Button for Seniors: Device that sends an alert to family members in case of emergency.
+Sistema de alerta de emergência para idosos com três camadas principais no workspace: backend, frontend e mobile.
 
-## Figma Project Screenpages
+## Links de design
 
+Projeto Figma principal:
 https://www.figma.com/design/BFPobDjzjU1PErCvVp1E4D/Emerg%C3%AAncia-60-?node-id=0-1&p=f&t=uddJcs2wwY3jTuAo-0
 
-## Figma Inspirations Pages
-
+Inspirações:
 https://www.figma.com/community/file/1610021907811642485
 https://www.figma.com/community/file/1527618855496826535
 https://www.figma.com/community/file/1481906935181630982
 
-# 🆘 Projeto Integrador EBAC - Sistema IoT de Alerta de Emergência para Idosos
+## Visão Geral
 
-## 📌 Descrição
+O repositório está organizado para separar a API, a interface principal e o app mobile. A base atual combina NestJS no backend e Flutter nas camadas de apresentação.
 
-Este projeto tem como objetivo desenvolver uma solução baseada em **Internet das Coisas (IoT)** para auxiliar idosos em situações de emergência, permitindo o acionamento rápido de contatos responsáveis por meio de um botão físico conectado à internet.
+## Estrutura Atual
 
-A solução integra dispositivos embarcados, backend em nuvem e aplicação mobile, garantindo comunicação em tempo real e alta confiabilidade.
+- `apps/backend/`: API NestJS e regras de negócio do servidor
+- `apps/frontend/`: aplicação Flutter da camada de interface
+- `apps/mobile/`: aplicação Flutter mobile com arquitetura por módulos
 
----
+### Backend
 
-## 🧠 Arquitetura da Solução
+O backend fica em `apps/backend` e concentra a API HTTP, WebSocket, fila e acesso ao banco.
 
-A arquitetura segue um modelo orientado a eventos com comunicação assíncrona:
+Principais pastas:
 
-[ ESP32 (Botão) ]
-↓
-[ MQTT Broker ]
-↓
-[ Backend (NestJS) ]
-↓
-[ Banco de Dados ]
-↓
-[ Serviço de Notificação ]
-↓
-[ App Mobile (React Native) ]
+- `src/common/`
+- `src/config/`
+- `src/modules/alerts/`
+- `src/modules/auth/`
+- `src/modules/contacts/`
+- `src/modules/devices/`
+- `src/modules/elderly/`
+- `src/modules/health/`
+- `src/modules/notifications/`
+- `src/modules/users/`
+- `src/modules/websocket/`
+- `src/prisma/`
+- `src/queue/`
+- `src/workers/`
 
----
+Tecnologias e responsabilidades:
 
-## 🧱 Tecnologias Utilizadas
-
-### 🔙 Backend
-
-- Node.js
 - NestJS
+- Prisma
 - PostgreSQL
-- MQTT (Mosquitto / AWS IoT Core)
-- Redis (opcional)
+- Redis e BullMQ para filas e workers
+- Socket.IO para eventos em tempo real
+- Swagger para documentação da API
+- JWT para autenticação
 
-### 📱 Mobile
+### Frontend
 
-- React Native (Expo)
-- Axios
-- Firebase Cloud Messaging
+O frontend fica em `apps/frontend` e hoje está em um scaffold Flutter simples, preparado como base da camada de interface.
 
-### 🔌 IoT
+Estrutura principal:
 
-- ESP32
-- Protocolo MQTT
-- Wi-Fi
+- `lib/main.dart`
 
-### ☁️ Infraestrutura
+Esse app usa a estrutura padrão do Flutter e serve como ponto de partida para a experiência visual principal do projeto.
 
-- Docker / Docker Compose
-- VPS (DigitalOcean, Contabo) ou AWS
+### Mobile
 
----
+O mobile fica em `apps/mobile` e já está organizado em camadas mais explícitas.
 
-## 📁 Estrutura do Projeto (NX Monorepo)
+Estrutura principal:
 
-apps/
-api/ # Backend (NestJS)
-mobile/ # App Mobile (React Native)
-web-admin/ # (Opcional) Painel Web
+- `lib/core/config/`
+- `lib/core/network/`
+- `lib/core/services/`
+- `lib/modules/alerts/`
+- `lib/modules/auth/`
+- `lib/modules/elderly/`
+- `lib/shared/models/`
+- `lib/shared/widgets/`
 
-libs/
-core/ # Regras de negócio
-data-access/ # Integração com APIs
-types/ # Interfaces compartilhadas
-ui/ # Componentes reutilizáveis
+Essa aplicação usa:
 
-tools/
+- Flutter
+- flutter_bloc para estado
+- Dio para consumo da API
+- flutter_secure_storage para armazenamento seguro
 
----
+## Ambiente e Execução
 
-## ⚙️ Funcionalidades
+Pré-requisitos principais:
 
-### 👴 Para o usuário (idoso)
+- Node.js para o backend
+- Flutter SDK para as apps `frontend` e `mobile`
+- Docker e Docker Compose para serviços de apoio
 
-- Acionamento de botão de emergência físico
-
-### 👨‍👩‍👧 Para responsáveis
-
-- Recebimento de alertas em tempo real
-- Visualização de eventos
-- Confirmação de atendimento
-
-### 🛠️ Sistema
-
-- Cadastro de usuários e dispositivos
-- Registro de alertas
-- Notificações multicanal (Push, SMS, WhatsApp)
-
----
-
-## 🔄 Fluxo de Funcionamento
-
-1. O idoso pressiona o botão físico (ESP32)
-2. O dispositivo envia um evento via MQTT
-3. O backend consome o evento
-4. O sistema registra o alerta no banco de dados
-5. Notificações são enviadas aos contatos cadastrados
-6. O responsável recebe e pode responder ao alerta
-
----
-
-## 🔐 Segurança
-
-- Autenticação via JWT
-- Comunicação segura (HTTPS / TLS)
-- Identificação de dispositivos via API Key
-- Controle de acesso (RBAC)
-
----
-
-## 🗄️ Modelo de Dados (Simplificado)
-
-### users
-
-- id
-- name
-- type (elderly | guardian)
-
-### devices
-
-- id
-- user_id
-- status
-- last_seen
-
-### alerts
-
-- id
-- device_id
-- timestamp
-- status
-
----
-
-## 🚀 Como Executar o Projeto
-
-### Pré-requisitos
-
-- Node.js >= 18
-- Docker
-- NX CLI
-
-```bash
-npm install -g nx
-```
-
-### Executar com Docker Compose (recomendado)
-
-Use Docker Compose para criar todos os serviços (Postgres, Redis e backend NestJS). A porta 3000 do backend é mapeada para o host e expõe o Swagger UI e os endpoints REST.
+### Backend
 
 ```powershell
-# No diretório raiz do projeto
-docker-compose down --remove-orphans
-docker-compose up --build -d
-
-# Verificar containers em execução
-docker-compose ps
-
-# Ver logs do backend
-docker-compose logs -f backend
+cd apps/backend
+npm install
+npm run build
 ```
 
-Valide os endpoints em um terminal ou no browser:
+### Frontend
 
-```bash
-# Swagger UI (rota /docs):
-http://localhost:3000/docs
-
-# Health endpoint:
-curl http://localhost:3000/api/v1/health
+```powershell
+cd apps/frontend
+flutter pub get
+flutter run
 ```
 
-Observações:
-- Se estiver usando ambiente Windows/PowerShell, use `powershell` para executar os comandos acima.
-- As variáveis de ambiente para `DATABASE_URL`, `REDIS_*` e `JWT_*` são configuradas em `docker-compose.yml` ou via `.env` conforme necessário.
+### Mobile
 
-Se quiser, eu posso rodar os comandos de build/start aqui e confirmar o status dos endpoints para você.
+```powershell
+cd apps/mobile
+flutter pub get
+flutter run
+```
+
+### Docker
+
+O arquivo `docker-compose.yml` na raiz centraliza a orquestração dos serviços de infraestrutura usados pelo backend.
+
+## Observações
+
+- A documentação antiga que citava `apps/api`, `web-admin` e `libs/` não corresponde mais à estrutura atual.
+- Se quiser, o próximo passo natural é detalhar a responsabilidade de cada módulo do backend ou separar o README em arquivos por app.
